@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پنل پرسش و پاسخ — qa-panel</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+<style>
+:root{
+  --bg:#0e1320; --panel:#161d2e; --panel2:#1c2539; --line:#2a3550;
+  --txt:#e8ebf4; --mut:#8f9ab5; --acc:#7c5cff; --acc2:#22c55e; --warn:#f59e0b; --err:#ef4444;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:Vazirmatn,'Vazirmatn',Tahoma,'Segoe UI',sans-serif}
+body{min-height:100vh;display:flex;flex-direction:column}
+header.top{padding:18px 24px 0;max-width:1180px;margin:0 auto;width:100%}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:20px;margin:0;font-weight:800}
+.brand span{color:var(--mut);font-size:13px}
+.tabs{display:flex;gap:8px;margin-top:16px;border-bottom:1px solid var(--line)}
+.tabs button{all:unset;cursor:pointer;padding:10px 18px;font-family:inherit;font-size:14px;font-weight:700;color:var(--mut);border-radius:10px 10px 0 0;border:1px solid transparent;border-bottom:none;position:relative;top:1px}
+.tabs button:hover{color:var(--txt);background:var(--panel)}
+.tabs button.active{color:#fff;background:var(--panel);border-color:var(--line)}
+main{max-width:1180px;margin:0 auto;width:100%;padding:20px 24px 40px;flex:1}
+.view{display:none}
+.view.active{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 12px;font-size:16px;font-weight:800}
+.card h3{margin:0 0 10px;font-size:14px;font-weight:700;color:var(--mut)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grow{flex:1;min-width:200px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--mut);flex:1;min-width:180px}
+label.f input,label.f select{background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--txt);padding:9px 11px;font-family:inherit;font-size:13px}
+label.f input:focus,textarea:focus,select:focus{outline:2px solid var(--acc);outline-offset:0;border-color:var(--acc)}
+textarea{width:100%;min-height:220px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:12px;font-family:inherit;font-size:13.5px;line-height:1.9;resize:vertical}
+.btn{all:unset;cursor:pointer;background:var(--acc);color:#fff;padding:10px 18px;border-radius:10px;font-family:inherit;font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{filter:brightness(1.12)}
+.btn.sec{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}
+.btn.ok{background:var(--acc2)}
+.btn.warn{background:var(--warn);color:#1c1400}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:6px 12px;font-size:12px;border-radius:8px}
+.hint{font-size:12px;color:var(--mut);line-height:1.9}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--mut)}
+.pill b{color:var(--txt)}
+.bar{height:9px;background:var(--panel2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),#4f8cff);width:0;transition:width .3s}
+details.box{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-top:12px}
+details.box summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--mut)}
+details.box summary:hover{color:var(--txt)}
+.chunks{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.chip{font-size:11.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--mut)}
+.chip.run{border-color:var(--acc);color:#cfc2ff;background:#221a44}
+.chip.done{border-color:var(--acc2);color:#b7f3cc;background:#12291c}
+.chip.err{border-color:var(--err);color:#ffc9c9;background:#2e1515}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:9px}
+.q .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.q .n{font-size:11px;color:var(--mut)}
+.q .tp{font-size:11px;color:#cfc2ff;background:#221a44;border:1px solid #3d2f7a;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.q .qt{font-size:14px;font-weight:700;line-height:1.8}
+.q .op{display:flex;flex-direction:column;gap:6px}
+.q .op button{all:unset;cursor:pointer;font-family:inherit;font-size:12.8px;padding:8px 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);line-height:1.7;text-align:right}
+.q .op button:hover{border-color:var(--acc)}
+.q.rev .op button.cor{border-color:var(--acc2);background:#12291c;color:#c4f7d6}
+.q.rev .op button.wrong{opacity:.55}
+.q .ex{display:none;font-size:12px;color:var(--mut);background:var(--panel2);border-radius:8px;padding:9px 11px;line-height:1.8;border-right:3px solid var(--acc2)}
+.q.rev .ex{display:block}
+.q .del{all:unset;cursor:pointer;color:var(--err);font-size:11.5px;font-family:inherit}
+.stats{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--mut)}
+.stats b{color:var(--txt);font-size:15px}
+.acc{border:1px solid var(--line);border-radius:10px;background:var(--panel);margin-bottom:10px;overflow:hidden}
+.acc>summary{cursor:pointer;padding:11px 15px;font-size:13.5px;font-weight:700;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.acc>summary:hover{background:var(--panel2)}
+.acc .list{padding:4px 15px 13px;display:flex;flex-direction:column;gap:6px}
+.secrow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.8px;padding:7px 10px;border-radius:8px;border:1px solid transparent}
+.secrow:hover{background:var(--panel2);border-color:var(--line)}
+.secrow .t{flex:1;line-height:1.7}
+.secrow .w{color:var(--mut);font-size:11.5px;white-space:nowrap}
+.toast{position:fixed;bottom:18px;left:18px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 16px;font-size:13px;z-index:99;box-shadow:0 8px 30px rgba(0,0,0,.5);opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;max-width:340px}
+.toast.show{opacity:1;transform:none}
+code,kbd{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:12px;font-family:ui-monospace,Menlo,monospace;direction:ltr;display:inline-block}
+ol,ul{line-height:2.1;font-size:13.5px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:right}
+th{background:var(--panel2)}
+.status{font-size:12.5px;color:var(--mut)}
+.status b.run{color:var(--acc)} .status b.ok{color:var(--acc2)} .status b.bad{color:var(--err)}
+@media (max-width:640px){ .qgrid{grid-template-columns:1fr} header.top,main{padding-inline:14px} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>پنل پرسش و پاسخ</h1>
+    <span>qa-panel — کارگاه ساخت سوال چهارگزینه‌ای از متن</span>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button data-view="gen" class="active">تولید سوال</button>
+    <button data-view="bank">بانک دانش</button>
+    <button data-view="help">راهنما</button>
+  </nav>
+</header>
+<main>
+
+<!-- ================= TAB 1 : MCQ GENERATOR ================= -->
+<section class="view active" id="view-gen">
+
+  <div class="card">
+    <h2>تنظیمات مدل زبانی</h2>
+    <div class="row">
+      <label class="f">نشانی پایه‌ی API (سازگار با OpenAI)
+        <input id="cfg-base" placeholder="مثال: https://api.openai.com/v1 یا https://api.z.ai/api/paas/v4" dir="ltr">
+      </label>
+      <label class="f">کلید API
+        <input id="cfg-key" type="password" placeholder="sk-..." dir="ltr">
+      </label>
+      <label class="f">نام مدل
+        <input id="cfg-model" placeholder="مثال: gpt-4o-mini یا glm-4.5-air" dir="ltr">
+      </label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <label class="f" style="max-width:190px">حداکثر سوال در هر تکه
+        <input id="cfg-perchunk" type="number" min="1" max="20" value="6">
+      </label>
+      <label class="f" style="max-width:190px">اندازه‌ی تکه (واژه)
+        <input id="cfg-maxwords" type="number" min="300" max="2000" value="1000">
+      </label>
+      <span class="pill" style="align-self:flex-end">کلید فقط در <b>localStorage همین مرورگر</b> ذخیره می‌شود</span>
+    </div>
+    <details class="box" id="prompt-box">
+      <summary>پرامپت سازنده‌ی سوال (شامل نمونه‌سوال‌ها) — قابل ویرایش</summary>
+      <textarea id="cfg-prompt" style="min-height:320px;margin-top:10px"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn sec sm" id="btn-prompt-reset">بازگردانی پرامپت پیش‌فرض</button>
+        <span class="hint">نمونه‌سوال‌های واقعی داخل پرامپت، سبک مطلوب را به مدل نشان می‌دهند.</span>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>متن ورودی</h2>
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn sec sm" id="btn-file">بارگذاری فایل (md / txt)</button>
+      <input type="file" id="file-in" accept=".md,.txt,.markdown,text/plain" hidden>
+      <button class="btn sec sm" id="btn-clear">پاک کردن</button>
+      <span class="status" id="in-stats">۰ واژه</span>
+      <span class="hint" style="flex:1">متن حدوداً ۱۰۰۰ واژه‌ای (یا فایل کامل بانک دانش) را بچسبانید؛ پنل خودکار تکه‌تکه می‌کند.</span>
+    </div>
+    <textarea id="in-text" placeholder="متن دانشی را این‌جا بچسبانید... می‌توانید کل فایل «بانک دانش» را هم با دکمه‌ی بارگذاری فایل انتخاب کنید؛ پنل روی نشانه‌های بخش، متن را تکه می‌کند."></textarea>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" id="btn-run">شروع ساخت سوال</button>
+      <button class="btn warn" id="btn-stop" disabled>توقف</button>
+      <span class="status" id="gen-status">آماده</span>
+    </div>
+    <div class="bar" style="margin-top:12px"><i id="gen-bar"></i></div>
+    <div class="chunks" id="chunk-list"></div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">سوال‌های ساخته‌شده</h2>
+      <div class="row">
+        <input id="q-search" placeholder="جستجو در سوال‌ها..." style="background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--txt);padding:8px 12px;font-family:inherit;font-size:12.5px;width:180px">
+        <button class="btn sec sm" id="btn-exp-json">خروجی JSON</button>
+        <button class="btn sec sm" id="btn-exp-md">برگه‌ی آزمون (MD)</button>
+        <button class="btn sec sm" id="btn-copy">کپی همه</button>
+        <button class="btn sec sm" id="btn-wipe">خالی کردن</button>
+      </div>
+    </div>
+    <div class="stats" style="margin:12px 0">
+      <span>تعداد سوال: <b id="st-total">۰</b></span>
+      <span>از تکه‌ها: <b id="st-chunks">۰</b></span>
+      <span>موضوع‌ها: <b id="st-topics">۰</b></span>
+    </div>
+    <div class="qgrid" id="q-grid"></div>
+    <p class="hint" id="q-empty">هنوز سوالی ساخته نشده است. متن ورودی را کامل کنید و «شروع ساخت سوال» را بزنید.</p>
+  </div>
+</section>
+
+<!-- ================= TAB 2 : KNOWLEDGE BANK ================= -->
+<section class="view" id="view-bank">
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">بانک دانش ایران‌شناسی</h2>
+      <div class="row">
+        <button class="btn sec sm" id="btn-bank-file">بارگذاری فایل بانک</button>
+        <input type="file" id="bank-file-in" accept=".md,.txt,text/plain" hidden>
+        <button class="btn sec sm" id="btn-bank-reload">بارگیری از مخزن</button>
+      </div>
+    </div>
+    <p class="hint" id="bank-status">در حال بارگیری <code>data/iranology-quiz-bank.md</code> از همین مخزن...</p>
+    <div class="stats" id="bank-stats" style="margin:8px 0"></div>
+    <input id="bank-search" placeholder="جستجو در عنوان بخش‌ها..." style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--txt);padding:10px 13px;font-family:inherit;font-size:13px">
+    <div class="row" style="margin-top:12px">
+      <button class="btn sm" id="btn-send-topic">ارسال موضوع انتخاب‌شده به «تولید سوال»</button>
+      <button class="btn sec sm" id="btn-send-all">ارسال کل بانک به «تولید سوال»</button>
+      <span class="hint">ابتدا موضوع را از فهرست زیر باز کنید؛ هر بخش دکمه‌ی ارسال مجزا دارد.</span>
+    </div>
+    <div id="bank-list" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- ================= TAB 3 : HELP ================= -->
+<section class="view" id="view-help">
+  <div class="card">
+    <h2>پنل چه می‌کند؟</h2>
+    <p class="hint" style="font-size:13.5px">
+      پنل qa-panel ابزار ساخت «سوال چهارگزینه‌ای به سبک تراویا» از متن‌های دانشی است.
+      متن حدوداً ۱۰۰۰ واژه‌ای (یا کل فایل بانک دانش) را می‌دهید؛ پنل متن را روی مرز
+      <code>&lt;!-- SECTION --&gt;</code>ها یا مرز حدود ۱۰۰۰ واژه تکه می‌کند، هر تکه را با پرامپت آماده
+      (همراه نمونه‌سوال‌های واقعی) به مدل زبانی می‌فرستد و سوال‌ها را جمع، یکتاسازی و رندر می‌کند.
+    </p>
+  </div>
+  <div class="card">
+    <h2>راه‌اندازی مدل</h2>
+    <ol>
+      <li>در تب «تولید سوال»، نشانی پایه‌ی یک API سازگار با OpenAI را وارد کنید؛ مثل <code>https://api.openai.com/v1</code> یا <code>https://api.z.ai/api/paas/v4</code>.</li>
+      <li>کلید API و نام مدل را بنویسید (مثل <code>glm-4.5-air</code> یا <code>gpt-4o-mini</code>).</li>
+      <li>«شروع ساخت سوال» را بزنید. پیشرفت هر تکه جداگانه نمایش داده می‌شود و خرابیِ یک تکه بقیه را متوقف نمی‌کند.</li>
+    </ol>
+    <p class="hint">کلید API فقط در localStorage همین مرورگر نگه داشته می‌شود و فقط به همان نشانی که خودتان وارد کرده‌اید فرستاده می‌شود. اگر نشانی درست را در مرورگر باز کرده باشید و درخواست به CORS بخورد، از پراکسی سازگار با مرورگر استفاده کنید یا فایل را روی یک دامنه‌ی مجاز اجرا کنید.</p>
+  </div>
+  <div class="card">
+    <h2>خروجی‌ها</h2>
+    <ul>
+      <li><b>JSON</b> — آرایه‌ی سوال‌ها با <code>question</code>، <code>options</code>، <code>answerIndex</code>، <code>explanation</code> و <code>topic</code>؛ مناسب استفاده‌ی برنامه‌ای.</li>
+      <li><b>برگه‌ی آزمون (Markdown)</b> — صورت سوال با گزینه‌های الف تا د + پاسخ‌نامه‌ی جدا در انتهای فایل.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>بانک دانش</h2>
+    <p class="hint" style="font-size:13.5px">
+      فایل <code>data/iranology-quiz-bank.md</code> گنجینه‌ی بزرگ ایران‌شناسی این پنل است:
+      ۳۱۷ بخش دانشی در ۱۰ موضوع (ایران باستان، تاریخ و ایران‌شناسی، بناها، شهرها، فرهنگ و آیین‌ها،
+      ادبیات، حماسه، دانشمندان، سینما، ورزش) با مجموع حدود ۱۳۶ هزار واژه؛ هر بخش زیر ۱۰۰۰ واژه.
+      منبع: مخزن <code>jaberkh123/iran-history-iranology</code> در گیت‌هاب.
+      در تب «بانک دانش» می‌توانید بخش‌ها را مرور کنید و هر بخش یا کل یک موضوع را به تب تولید سوال بفرستید.
+    </p>
+  </div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ============================== helpers ============================== */
+const $ = s => document.querySelector(s);
+const FA = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const EN = s => s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+const wc = t => (t.trim().match(/\S+/g) || []).length;
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let toastT;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3200); }
+function download(name, text, type='text/plain;charset=utf-8'){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+function openView(id){
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.view===id));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+id));
+}
+$('#tabs').addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b) return; openView(b.dataset.view);
+  if(b.dataset.view==='bank') bankAutoLoad();
+});
+
+/* ============================== default prompt ============================== */
+const SAMPLES = [
+ {question:"لحظه‌ی تحویل سال در تقویم ایرانی بر مبنای چه چیزی تعیین می‌شود؟",options:["آغاز طلوع خورشید در اول فروردین","لحظه‌ی دقیق اعتدال بهاری","ديدنِ ماه در نخستین شب قمری","اوج چله‌ی زمستان"],answerIndex:1,explanation:"نوروز ایرانی با لحظه‌ی نجومی اعتدال بهاری تعیین می‌شود؛ نه با یک تاریخ ثابت.",topic:"نوروز"},
+ {question:"نخستین ثبت جهانی «نوروز» در فهرست میراث ناملموس یونسکو در چه سالی انجام شد؟",options:["۲۰۰۳","۲۰۱۰","۲۰۱۶","۲۰۲۴"],answerIndex:2,explanation:"نوروز در سال ۲۰۱۶ با پرونده‌ای مشترک از بیش از ده کشور در فهرست یونسکو ثبت شد.",topic:"نوروز"},
+ {question:"فرش پازیریک — کهن‌ترین فرش بافته‌ی شناخته‌شده‌ی جهان — امروز در کدام موزه نگهداری می‌شود؟",options:["موزه لوور پاریس","موزه ارمیتاژ سنت‌پترزبورگ","موزه بریتانیا لندن","موزه ملی ایران تهران"],answerIndex:1,explanation:"فرش پازیریک در ۱۹۴۹ در آرامگاه یخ‌زده‌ی پازیریک در سیبری کشف شد و امروز در موزه‌ی ارمیتاژ است.",topic:"فرش"},
+ {question:"به روایت‌های مشهور، بذر چای ایران با چه روشی از هند به ایران آورده شد؟",options:["در جوف عصای کاشف‌السلطنه","در بشکه‌ی چای با مجوز رسمی","در بارنامه‌ی تجاری هند","در بسته‌بندی کتاب‌های درسی"],answerIndex:0,explanation:"محمد میرزا کاشف‌السلطنه بذر چای را پنهانی در عصای خود از هند آورد؛ او «پدر چای ایران» است.",topic:"چای"},
+ {question:"جمشید کاشانی مقدار عدد پی را تا چند رقم اعشار محاسبه کرد؛ رکوردی که حدود ۱۸۰ سال پابرجا ماند؟",options:["۸ رقم","۱۲ رقم","۱۶ رقم","۳۲ رقم"],answerIndex:2,explanation:"جمشید کاشانی عدد پی را با ۱۶ رقم اعشار حساب کرد و حدود ۱۸۰ سال رکورد او نزدیک ماند.",topic:"دانشمندان"},
+ {question:"به کدام دانشمند ایرانی «پدر جبر و الگوریتم» می‌گویند؟",options:["ابوعلی سینا","محمد بن موسی خوارزمی","ابوریحان بیرونی","خواجه نصیرالدین طوسی"],answerIndex:1,explanation:"واژه‌ی «الگوریتم» از نام خوارزمی و «جبر» از کتاب «الجبر والمقابله»ی او آمده است.",topic:"دانشمندان"},
+ {question:"نخستین زنی که مدال فیلدز ریاضیات را دریافت کرد چه کسی بود؟",options:["مریم میرزاخانی","شیرین عبادی","سیمین دانشور","سیمین بهبهانی"],answerIndex:0,explanation:"مریم میرزاخانی، ریاضی‌دان ایرانی، نخستین زن برنده‌ی مدال فیلدز است.",topic:"دانشمندان"},
+ {question:"کدام بازی، قدیمی‌ترین بازی تیمیِ با اسب شناخته می‌شود؟",options:["چوگان","بوزکاشی","سوارکاری پرش با مانع","دندانه"],answerIndex:0,explanation:"چوگان — بازی شاهان ایران — قدیمی‌ترین بازی تیمی با اسب است و ریشه‌ی پولو مدرن از آن است.",topic:"ورزش"},
+ {question:"بزرگ‌ترین بنای خشتی جهان کدام است؟",options:["ارگ کریم‌خان شیراز","ارگ بم","تاق کسری","گنبد سلطانیه"],answerIndex:1,explanation:"ارگ بم در کرمان بزرگ‌ترین بنای خشتی جهان است.",topic:"بناها"},
+ {question:"«گنبد قابوس» با چه ویژگی‌ای رکورددار است؟",options:["بلندترین برج آجری هزارساله","بزرگ‌ترین گنبد دوپوسته","کهن‌ترین مسجد چوبی ایران","بلندترین دیوار دفاعی"],answerIndex:0,explanation:"گنبد قابوس در گرگان بلندترین برج آجری هزارساله‌ی جهان است.",topic:"بناها"},
+ {question:"«تاق کسری» — ایوان بزرگ تیسفون — امروز در کدام نقطه قرار دارد؟",options:["شوش ایران","مدائن (تیسفون) در عراق","بغداد مرکز","شهر سوخته سیستان"],answerIndex:1,explanation:"تاق کسری در تیسفون (مدائن) عراقِ امروز، کاخ زمستانی ساسانیان است.",topic:"بناها"},
+ {question:"شب یلدا در کدام شب برگزار می‌شود؟",options:["نخستین شب زمستان","آخرین شب پاییز","میانه‌ی چله‌ی بزرگ","چهلمین شب زمستان"],answerIndex:1,explanation:"یلدا یا شب چله، آخرین شب پاییز و یکی از بلندترین شب‌های سال است.",topic:"یلدا"}
+];
+const DEFAULT_PROMPT =
+`تو طراحِ حرفه‌ای «سوال چهارگزینه‌ای به سبک تراویا» هستی. از متنِ دانشی‌ای که در پیام کاربر می‌آید، تا جایی که محتوای واقعی اجازه می‌دهد، سوال‌های چهارگزینه‌ای متنوع و باکیفیت بساز.
+
+قواعد سوال‌سازی:
+1. هر سوال دقیقاً ۴ گزینه دارد و فقط یک گزینه درست است.
+2. گزینه‌های غلط باید باورپذیر باشند (از همان خانواده‌ی موضوعی متن) اما واضحاً غلط؛ هم‌طول و هم‌شکل نگه‌شان دار.
+3. سبک‌ها را متنوع کن: پرسش مستقیم («... چیست؟»)، «کدام‌یک ...؟»، جاهای خالی، تاریخ و عدد، مکان، شخصیت، لقب‌ها و «نکته‌های نغز».
+4. سختی را مخلوط کن: حدود یک‌چهارم آسان، نیمی متوسط، یک‌چهارم دشوار.
+5. فقط از واقعیت‌های موجود در متن استفاده کن؛ هیچ چیز از خودت نساز. اگر تکه‌ی متن کم‌محتوا بود، سوال کمتر بساز.
+6. از گزینه‌های «همه‌ی موارد»، «هیچ‌کدام» یا «هر دو» استفاده نکن.
+7. جای گزینه‌ی درست را بین ۰ تا ۳ پخش کن؛ همیشه گزینه‌ی اول نباشد.
+8. برای هر سوال یک توضیحِ یک‌جمله‌ای بنویس که پاسخ را تثبیت می‌کند؛ «topic» را کوتاه (مثل «نوروز» یا «ساسانیان») بگیر.
+
+فرمت خروجی — فقط و فقط یک آرایه‌ی JSON معتبر؛ بدون هیچ متن اضافه، بدون بلوک کد:
+[{"question":"متن سوال","options":["گزینه۱","گزینه۲","گزینه۳","گزینه۴"],"answerIndex":0,"explanation":"توضیح کوتاه","topic":"موضوع"}]
+
+نمونه‌های واقعیِ سبکِ مطلوب (الگو بساز، کپی نکن):
+${JSON.stringify(SAMPLES, null, 1)}
+
+یادت باشد: خروجی نهایی فقط آرایه‌ی JSON باشد.`;
+
+/* ============================== settings ============================== */
+const LS = { settings:'qa-panel.settings.v1', questions:'qa-panel.questions.v1', input:'qa-panel.input.v1' };
+const settings = Object.assign({ base:'', key:'', model:'', perChunk:6, maxWords:1000, prompt:DEFAULT_PROMPT },
+  JSON.parse(localStorage.getItem(LS.settings) || '{}'));
+function saveSettings(){ localStorage.setItem(LS.settings, JSON.stringify(settings)); }
+const cfgEls = { base:$('#cfg-base'), key:$('#cfg-key'), model:$('#cfg-model'), perChunk:$('#cfg-perchunk'), maxWords:$('#cfg-maxwords'), prompt:$('#cfg-prompt') };
+function loadSettingsToUI(){
+  cfgEls.base.value=settings.base; cfgEls.key.value=settings.key; cfgEls.model.value=settings.model;
+  cfgEls.perChunk.value=settings.perChunk; cfgEls.maxWords.value=settings.maxWords; cfgEls.prompt.value=settings.prompt;
+}
+loadSettingsToUI();
+Object.keys(cfgEls).forEach(k=>cfgEls[k].addEventListener('input', ()=>{
+  settings.base=cfgEls.base.value.trim(); settings.key=cfgEls.key.value.trim(); settings.model=cfgEls.model.value.trim();
+  settings.perChunk=Math.max(1,Math.min(20,+EN(cfgEls.perChunk.value)||6));
+  settings.maxWords=Math.max(300,Math.min(2000,+EN(cfgEls.maxWords.value)||1000));
+  settings.prompt=cfgEls.prompt.value; saveSettings();
+}));
+$('#btn-prompt-reset').addEventListener('click', ()=>{ settings.prompt=DEFAULT_PROMPT; cfgEls.prompt.value=DEFAULT_PROMPT; saveSettings(); toast('پرامپت پیش‌فرض بازگردانی شد'); });
+
+/* ============================== input & chunking ============================== */
+const inputTA = $('#in-text');
+inputTA.value = localStorage.getItem(LS.input) || '';
+inputTA.addEventListener('input', ()=>{ localStorage.setItem(LS.input, inputTA.value); updateInStats(); });
+function updateInStats(){ $('#in-stats').textContent = FA(wc(inputTA.value)) + ' واژه'; }
+updateInStats();
+$('#btn-file').addEventListener('click', ()=>$('#file-in').click());
+$('#file-in').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{ inputTA.value=r.result; localStorage.setItem(LS.input,inputTA.value); updateInStats(); toast('فایل «'+f.name+'» بارگذاری شد'); }; r.readAsText(f,'utf-8');
+});
+$('#btn-clear').addEventListener('click', ()=>{ inputTA.value=''; localStorage.removeItem(LS.input); updateInStats(); });
+
+const SEC_RE = /<!--\s*SECTION\s+([^>]*?)-->([\s\S]*?)<!--\s*\/SECTION\s+([^>]*?)\s*-->/g;
+const SEC_ID_RE = /^[a-z]{1,4}\d{1,4}$/i;
+function attrOf(s){ const o={}; for(const m of s.matchAll(/(\w+)="([^"]*)"/g)) o[m[1]]=m[2]; return o; }
+function parseSections(text){
+  const out=[]; let last=0, m; SEC_RE.lastIndex=0;
+  while((m=SEC_RE.exec(text))){
+    const a=attrOf(m[1]);
+    if(!a.id || !SEC_ID_RE.test(a.id)){
+      // fake marker (e.g. a literal example in prose) — rescan right after this opening tag
+      SEC_RE.lastIndex = m.index + m[0].indexOf('-->') + 3;
+      continue;
+    }
+    const before=text.slice(last,m.index).trim();
+    if(before) out.push({title:null, body:before});
+    out.push({id:a.id, title:a.title||a.id||'بخش', group:a.group||'', topic:a.topic||a.source||'', words:+(a.words||0)||wc(m[2].trim()), body:m[2].trim()});
+    last=m.index+m[0].length;
+  }
+  const tail=text.slice(last).trim();
+  if(tail) out.push({title:null, body:tail});
+  return out;
+}
+function splitByParagraphs(text, maxWords){
+  const paras=text.split(/\n{2,}/).map(p=>p.trim()).filter(Boolean);
+  const parts=[]; let buf=[], n=0;
+  const flush=()=>{ if(buf.length){ parts.push(buf.join('\n\n')); buf=[]; n=0; } };
+  for(const p of paras){
+    const w=wc(p);
+    if(w>maxWords){ flush(); // hard split giant paragraph by words
+      const words=p.split(/\s+/);
+      for(let i=0;i<words.length;i+=maxWords) parts.push(words.slice(i,i+maxWords).join(' '));
+      continue;
+    }
+    if(n+w>maxWords && n>0) flush();
+    buf.push(p); n+=w;
+    if(n>=maxWords*0.85) flush();
+  }
+  flush();
+  return parts.length?parts:[text];
+}
+function planChunks(text, maxWords){
+  const chunks=[];
+  const hasMarkers = /SECTION/.test(text);
+  const units = hasMarkers ? parseSections(text) : [{title:null, body:text}];
+  for(const u of units){
+    const uw=wc(u.body);
+    const pieces = uw>maxWords*1.15 ? splitByParagraphs(u.body, maxWords) : [u.body];
+    pieces.forEach((p,i)=>{
+      const w=wc(p);
+      const label = u.title ? (pieces.length>1 ? u.title+' — بخش '+(i+1) : u.title) : (hasMarkers?'بخش بدون عنوان':'تکه '+(i+1));
+      chunks.push({label, topic:u.topic||'', body:p, words:w});
+    });
+  }
+  return chunks;
+}
+
+/* ============================== generation ============================== */
+let questions = JSON.parse(localStorage.getItem(LS.questions) || '[]');
+let chunks=[], running=false, stopFlag=false;
+function saveQuestions(){ localStorage.setItem(LS.questions, JSON.stringify(questions.slice(0,600))); }
+
+function setStatus(html){ $('#gen-status').innerHTML=html; }
+function renderChunks(){
+  $('#chunk-list').innerHTML = chunks.map((c,i)=>
+    `<span class="chip ${c.status||''}" title="${esc(c.label)}">${FA(i+1)}. ${esc(c.label.length>26?c.label.slice(0,26)+'…':c.label)} · ${FA(c.words)}w${c.count?` · ${FA(c.count)}س`:''}${c.err?` · خطا`:''}</span>`
+  ).join('') || '<span class="hint">هنوز تکه‌ای برنامه‌ریزی نشده است.</span>';
+  const done=chunks.filter(c=>c.status==='done').length, err=chunks.filter(c=>c.status==='err').length;
+  $('#gen-bar').style.width = chunks.length ? Math.round(100*(done+err)/chunks.length)+'%' : '0';
+}
+function extractJSON(content){
+  let s=String(content).replace(/```(?:json)?/gi,'').trim();
+  const a=s.indexOf('['), b=s.lastIndexOf(']');
+  if(a<0||b<=a) throw new Error('آرایه‌ی JSON در پاسخ یافت نشد');
+  const arr=JSON.parse(s.slice(a,b+1));
+  return Array.isArray(arr[0]) ? arr.flat() : arr; // مدل‌ها گاهی آرایه را دوبل می‌پیچند
+}
+async function generateForChunk(c){
+  const base=settings.base.replace(/\/+$/,'');
+  if(!base||!settings.model) throw new Error('نشانی پایه‌ی API یا نام مدل تنظیم نشده است');
+  const res=await fetch(base+'/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+settings.key},
+    body:JSON.stringify({
+      model:settings.model, temperature:0.8,
+      messages:[
+        {role:'system', content:settings.prompt},
+        {role:'user', content:`متنِ دانشی:\n\n${c.body}\n\n[عنوان بخش: ${c.label}] از این متن حداکثر ${settings.perChunk} سوال چهارگزینه‌ای بساز. خروجی فقط آرایه‌ی JSON.`}
+      ]
+    })
+  });
+  if(!res.ok){ const t=await res.text(); throw new Error('HTTP '+res.status+' — '+t.slice(0,140)); }
+  const data=await res.json();
+  const content=data.choices?.[0]?.message?.content || '';
+  const arr=extractJSON(content);
+  if(!Array.isArray(arr)||!arr.length) throw new Error('پاسخ خالی بود');
+  let added=0;
+  for(const it of arr){
+    if(!it||typeof it.question!=='string'||!Array.isArray(it.options)||it.options.length!==4) continue;
+    const ai=Number(it.answerIndex); if(!(ai>=0&&ai<=3)) continue;
+    const norm=it.question.replace(/\s+/g,' ').trim().toLowerCase();
+    if(questions.some(q=>q.norm===norm)) continue;
+    questions.push({ question:it.question.trim(), options:it.options.map(o=>String(o).trim()),
+      answerIndex:ai, explanation:String(it.explanation||'').trim(), topic:(it.topic||c.topic||c.label||'').toString().slice(0,40),
+      chunk:c.label, norm });
+    added++;
+  }
+  if(!added) throw new Error('سوال تازه‌ای در پاسخ نبود یا همه تکراری بودند');
+  return added;
+}
+async function run(){
+  if(running) return;
+  chunks = planChunks(inputTA.value, settings.maxWords);
+  if(!chunks.length){ toast('متنی برای پردازش نیست'); return; }
+  chunks.forEach(c=>c.status='');
+  running=true; stopFlag=false;
+  $('#btn-run').disabled=true; $('#btn-stop').disabled=false;
+  let ok=0, err=0;
+  for(let i=0;i<chunks.length;i++){
+    if(stopFlag){ setStatus('<b>متوقف شد</b>'); break; }
+    const c=chunks[i];
+    c.status='run'; renderChunks();
+    setStatus(`تکه‌ی <b>${FA(i+1)}/${FA(chunks.length)}</b> در حال تولید سوال...`);
+    try{
+      const n=await generateForChunk(c);
+      c.status='done'; c.count=n; ok++; saveQuestions(); renderQuestions();
+    }catch(e){ c.status='err'; c.err=String(e.message||e); err++; }
+    renderChunks();
+    await new Promise(r=>setTimeout(r,350));
+  }
+  running=false; $('#btn-run').disabled=false; $('#btn-stop').disabled=true;
+  if(!stopFlag) setStatus(`<b class="ok">پایان:</b> ${FA(ok)} تکه موفق، <b class="${err?'bad':'ok'}">${FA(err)} خطا</b>`);
+  saveQuestions();
+}
+$('#btn-run').addEventListener('click', run);
+$('#btn-stop').addEventListener('click', ()=>{ stopFlag=true; setStatus('<b class="bad">در حال توقف...</b>'); });
+
+/* ============================== render questions ============================== */
+const LET=['الف','ب','ج','د'];
+function renderQuestions(){
+  const q=filteredQuestions();
+  $('#st-total').textContent=FA(questions.length);
+  $('#st-chunks').textContent=FA(new Set(questions.map(x=>x.chunk)).size);
+  $('#st-topics').textContent=FA(new Set(questions.map(x=>x.topic)).size);
+  $('#q-empty').style.display = questions.length?'none':'block';
+  $('#q-grid').innerHTML = q.map((x,i)=>`
+    <div class="q" data-i="${questions.indexOf(x)}">
+      <div class="top"><span class="n">سوال ${FA(i+1)}${x.chunk?' · '+esc(x.chunk.slice(0,22)):''}</span>${x.topic?`<span class="tp">${esc(x.topic)}</span>`:''}</div>
+      <div class="qt">${esc(x.question)}</div>
+      <div class="op">${x.options.map((o,j)=>`<button data-j="${j}">${LET[j]}) ${esc(o)}</button>`).join('')}</div>
+      <div class="ex">${esc(x.explanation||'')}</div>
+      <div class="row"><button class="del" data-del="1">حذف این سوال</button></div>
+    </div>`).join('');
+}
+$('#q-grid').addEventListener('click', e=>{
+  const card=e.target.closest('.q'); if(!card) return;
+  const i=+card.dataset.i;
+  if(e.target.dataset.del){ questions.splice(i,1); saveQuestions(); renderQuestions(); return; }
+  const j=+e.target.dataset.j;
+  if(Number.isNaN(j)) return;
+  const x=questions[i];
+  card.classList.add('rev');
+  card.querySelectorAll('.op button').forEach((b,idx)=>{
+    b.classList.toggle('cor', idx===x.answerIndex);
+    if(idx!==x.answerIndex) b.classList.add('wrong');
+  });
+});
+function filteredQuestions(){
+  const s=$('#q-search').value.trim().toLowerCase();
+  return !s ? questions : questions.filter(x=>(x.question+' '+x.options.join(' ')+' '+x.topic).toLowerCase().includes(s));
+}
+$('#q-search').addEventListener('input', renderQuestions);
+$('#btn-wipe').addEventListener('click', ()=>{ if(confirm('همه‌ی سوال‌های ساخته‌شده پاک شوند؟')){ questions=[]; saveQuestions(); renderQuestions(); } });
+$('#btn-exp-json').addEventListener('click', ()=>{
+  if(!questions.length) return toast('سوالی برای خروجی نیست');
+  const out=questions.map(({question,options,answerIndex,explanation,topic,chunk})=>({question,options,answerIndex,explanation,topic,chunk}));
+  download('qa-panel-questions.json', JSON.stringify(out,null,2), 'application/json;charset=utf-8');
+});
+$('#btn-copy').addEventListener('click', async ()=>{
+  if(!questions.length) return toast('سوالی برای کپی نیست');
+  try{ await navigator.clipboard.writeText(JSON.stringify(questions.map(({question,options,answerIndex,explanation,topic})=>({question,options,answerIndex,explanation,topic})),null,2)); toast('کپی شد'); }
+  catch(e){ toast('کپی ناموفق بود — از خروجی JSON استفاده کنید'); }
+});
+$('#btn-exp-md').addEventListener('click', ()=>{
+  if(!questions.length) return toast('سوالی برای خروجی نیست');
+  const L=['',`# برگه‌ی آزمون چهارگزینه‌ای — ${FA(questions.length)} سوال`,''];
+  questions.forEach((x,i)=>{
+    L.push(`${FA(i+1)}. ${x.question}`);
+    x.options.forEach((o,j)=>L.push(`   ${LET[j]}) ${o}`));
+    L.push('');
+  });
+  L.push('---',''); L.push('## پاسخ‌نامه',''); 
+  questions.forEach((x,i)=>L.push(`${FA(i+1)}. گزینه‌ی «${LET[x.answerIndex]}» — ${x.explanation||''}`));
+  download('qa-panel-quiz.md', L.join('\n'));
+});
+
+/* ============================== bank tab ============================== */
+let bankSections=null, bankRaw='';
+function bankAutoLoad(){
+  if(bankSections) return;
+  fetch('data/iranology-quiz-bank.md').then(r=>{ if(!r.ok) throw new Error(r.status); return r.text(); })
+    .then(t=>{ setBank(t); $('#bank-status').textContent='فایل بانک از مخزن بارگیری شد. برای استفاده‌ی آفلاین، فایل را با دکمه‌ی «بارگذاری فایل بانک» هم می‌توانید بدهید.'; })
+    .catch(()=>{ $('#bank-status').textContent='بارگیری خودکار ناموفق بود (مثلاً باز از file://). با دکمه‌ی «بارگذاری فایل بانک» فایل md را انتخاب کنید.'; });
+}
+function setBank(text){
+  bankRaw=text;
+  bankSections=parseSections(text).filter(s=>s.title);
+  renderBank();
+}
+$('#btn-bank-file').addEventListener('click', ()=>$('#bank-file-in').click());
+$('#bank-file-in').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{ setBank(r.result); $('#bank-status').textContent='فایل «'+f.name+'» بارگذاری شد — '+FA(bankSections.length)+' بخش.'; }; r.readAsText(f,'utf-8');
+});
+$('#btn-bank-reload').addEventListener('click', ()=>{ bankSections=null; bankAutoLoad(); });
+function renderBank(){
+  const s=$('#bank-search').value.trim().toLowerCase();
+  const byTopic={};
+  bankSections.forEach(sec=>{ (byTopic[sec.topic||'متفرقه'] ||= []).push(sec); });
+  const topics=Object.keys(byTopic).filter(t=>!s || t.toLowerCase().includes(s) || byTopic[t].some(x=>x.title.toLowerCase().includes(s)));
+  $('#bank-stats').innerHTML = `<span>بخش‌ها: <b>${FA(bankSections.length)}</b></span><span>موضوع‌ها: <b>${FA(topics.length)}</b></span><span>مجموع واژه‌ها: <b>${FA(wc(bankRaw))}</b></span>`;
+  $('#bank-list').innerHTML = topics.map(t=>{
+    const secs=byTopic[t].filter(x=>!s||x.title.toLowerCase().includes(s)||t.toLowerCase().includes(s));
+    const words=byTopic[t].reduce((a,x)=>a+x.words,0);
+    return `<details class="acc" data-topic="${esc(t)}"><summary><span>${esc(t)}</span><span class="w">${FA(secs.length)} بخش · ${FA(words)} واژه</span></summary><div class="list">${
+      secs.map(x=>`<div class="secrow" data-sec="${bankSections.indexOf(x)}"><span class="t">${esc(x.title)}</span><span class="w">${FA(x.words)} واژه</span><button class="btn sec sm" data-send="1">سوال از این بخش</button></div>`).join('')
+    }</div></details>`;
+  }).join('') || '<p class="hint">چیزی یافت نشد.</p>';
+}
+$('#bank-search').addEventListener('input', ()=>bankSections&&renderBank());
+$('#bank-list').addEventListener('click', e=>{
+  if(!e.target.dataset.send) return;
+  const row=e.target.closest('.secrow'); const x=bankSections[+row.dataset.sec];
+  inputTA.value=x.body; localStorage.setItem(LS.input,x.body); updateInStats();
+  openView('gen'); toast('بخش «'+x.title.slice(0,28)+'…» به تولید سوال رفت'); window.scrollTo({top:0,behavior:'smooth'});
+});
+$('#btn-send-topic').addEventListener('click', ()=>{
+  if(!bankSections) return toast('اول بانک را بار کنید');
+  const open=document.querySelector('#bank-list details.acc[open]');
+  if(!open) return toast('یک موضوع را از فهرست باز کنید');
+  const t=open.dataset.topic;
+  const body=bankSections.filter(x=>(x.topic||'متفرقه')===t).map(x=>x.body).join('\n\n');
+  inputTA.value=body; localStorage.setItem(LS.input,body); updateInStats();
+  openView('gen'); toast('موضوع «'+t+'» به تولید سوال رفت');
+});
+$('#btn-send-all').addEventListener('click', ()=>{
+  if(!bankSections) return toast('اول بانک را بار کنید');
+  inputTA.value=bankRaw; localStorage.setItem(LS.input,bankRaw); updateInStats();
+  openView('gen'); toast('کل بانک به تولید سوال رفت — '+FA(chunks.length||planChunks(bankRaw,settings.maxWords).length)+' تکه');
+});
+
+/* ============================== init ============================== */
+renderQuestions(); renderChunks();
+</script>
+</body>
+</html>

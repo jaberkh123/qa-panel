@@ -1,0 +1,57 @@
+{
+  "sections": 317,
+  "words_approx": 136413,
+  "bytes": 1487729,
+  "topics": [
+    {
+      "topic": "ایران باستان و پیشااسلامی",
+      "file": "iran-preislam.md",
+      "sections": 19
+    },
+    {
+      "topic": "تاریخ و ایران‌شناسی",
+      "file": "iran-history-iranology.md",
+      "sections": 47
+    },
+    {
+      "topic": "بناها و یادمان‌ها",
+      "file": "iran-monuments.md",
+      "sections": 28
+    },
+    {
+      "topic": "شهرهای ایران",
+      "file": "iran-cities.md",
+      "sections": 17
+    },
+    {
+      "topic": "فرهنگ، سنت‌ها و آیین‌ها",
+      "file": "iran-culture-traditions.md",
+      "sections": 60
+    },
+    {
+      "topic": "ادبیات فارسی",
+      "file": "iran-literature.md",
+      "sections": 19
+    },
+    {
+      "topic": "قهرمانان، حماسه و اسطوره",
+      "file": "iran-heroes-epics.md",
+      "sections": 66
+    },
+    {
+      "topic": "دانشمندان ایران",
+      "file": "iran-scientists.md",
+      "sections": 20
+    },
+    {
+      "topic": "سینما و هنرهای نمایشی",
+      "file": "iran-cinema.md",
+      "sections": 21
+    },
+    {
+      "topic": "ورزش و بازی‌های ایرانی",
+      "file": "iran-sports.md",
+      "sections": 20
+    }
+  ]
+}
