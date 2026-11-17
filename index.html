@@ -98,6 +98,7 @@ th{background:var(--panel2)}
   </div>
   <nav class="tabs" id="tabs">
     <button data-view="gen" class="active">تولید سوال</button>
+    <button data-view="batch">درخواست‌های دسته‌ای</button>
     <button data-view="bank">بانک دانش</button>
     <button data-view="help">راهنما</button>
   </nav>
@@ -179,7 +180,81 @@ th{background:var(--panel2)}
   </div>
 </section>
 
-<!-- ================= TAB 2 : KNOWLEDGE BANK ================= -->
+<!-- ================= TAB 2 : BATCH REQUESTS ================= -->
+<section class="view" id="view-batch">
+
+  <div class="card">
+    <h2>تنظیمات مدل زبانی — مشترک با تب «تولید سوال»</h2>
+    <div class="row">
+      <label class="f">نشانی پایه‌ی API (سازگار با OpenAI)
+        <input id="b-cfg-base" placeholder="مثال: https://api.openai.com/v1 یا https://api.z.ai/api/paas/v4" dir="ltr">
+      </label>
+      <label class="f">کلید API
+        <input id="b-cfg-key" type="password" placeholder="sk-..." dir="ltr">
+      </label>
+      <label class="f">نام مدل
+        <input id="b-cfg-model" placeholder="مثال: gpt-4o-mini یا glm-4.5-air" dir="ltr">
+      </label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <span class="pill" id="b-cfg-status">...</span>
+      <span class="hint" style="flex:1">همان کلید و مدلی که در تب «تولید سوال» تنظیم کرده‌اید این‌جا هم به کار می‌رود؛ تغییر در هر دو تب ذخیره می‌شود.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>درخواست‌ها — هر خط یک درخواست</h2>
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn sec sm" id="b-sample">درج نمونه</button>
+      <button class="btn sec sm" id="b-clear-reqs">پاک کردن</button>
+      <span class="hint" style="flex:1">مثال خط اول: <code>۲۰۰ تا اسم دانشمند مشهور ایرانی و جهانی رو برگردون</code> — پنل خط‌ها را دونه‌دونه به مدل می‌فرستد، جواب‌ها را جمع می‌کند و تکراری‌ها را حذف می‌کند.</span>
+    </div>
+    <textarea id="b-reqs" placeholder="هر خط یک درخواست کامل است؛ مثلاً:
+۲۰۰ تا اسم دانشمند مشهور ایرانی و جهانی رو برگردون
+۱۵۰ اسم شاعر و نویسنده‌ی مشهور ایرانی و جهانی رو برگردون"></textarea>
+    <div class="row" style="margin-top:14px">
+      <label class="f" style="max-width:170px">تکرار هر درخواست
+        <input id="b-repeat" type="number" min="1" max="10" value="1">
+      </label>
+      <label class="f" style="max-width:220px">تأخیر بین درخواست‌ها (میلی‌ثانیه)
+        <input id="b-delay" type="number" min="0" max="10000" value="350">
+      </label>
+      <button class="btn" id="b-run">شروع ارسال</button>
+      <button class="btn warn" id="b-stop" disabled>توقف</button>
+      <span class="status" id="b-status">آماده</span>
+    </div>
+    <div class="bar" style="margin-top:12px"><i id="b-bar"></i></div>
+    <div class="chunks" id="b-chips"></div>
+    <details class="box">
+      <summary>پرامپت سیستمِ استخراج فهرست — قابل ویرایش</summary>
+      <textarea id="b-prompt" style="min-height:220px;margin-top:10px"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn sec sm" id="b-prompt-reset">بازگردانی پرامپت پیش‌فرض</button>
+        <span class="hint">این پرامپت به مدل می‌گوید پاسخ را فقط به‌شکل فهرستِ تک‌خطی بدهد تا پنل بتواند موارد را جدا و یکتا کند.</span>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">موارد برگشته (بدون تکرار)</h2>
+      <div class="row">
+        <button class="btn sec sm" id="b-exp-md">خروجی MD</button>
+        <button class="btn sec sm" id="b-copy">کپی همه</button>
+        <button class="btn sec sm" id="b-wipe">خالی کردن</button>
+      </div>
+    </div>
+    <div class="stats" style="margin:12px 0">
+      <span>موارد یکتا: <b id="b-st-uniq">۰</b></span>
+      <span>تکراری حذف‌شده: <b id="b-st-dups">۰</b></span>
+      <span>خطاها: <b id="b-st-errs">۰</b></span>
+    </div>
+    <div id="b-results"></div>
+    <p class="hint" id="b-empty">هنوز نتیجه‌ای نیست. درخواست‌ها را بالا بنویسید و «شروع ارسال» را بزنید.</p>
+  </div>
+</section>
+
+<!-- ================= TAB 3 : KNOWLEDGE BANK ================= -->
 <section class="view" id="view-bank">
   <div class="card">
     <div class="row" style="justify-content:space-between">
@@ -202,7 +277,7 @@ th{background:var(--panel2)}
   </div>
 </section>
 
-<!-- ================= TAB 3 : HELP ================= -->
+<!-- ================= TAB 4 : HELP ================= -->
 <section class="view" id="view-help">
   <div class="card">
     <h2>پنل چه می‌کند؟</h2>
@@ -211,6 +286,7 @@ th{background:var(--panel2)}
       متن حدوداً ۱۰۰۰ واژه‌ای (یا کل فایل بانک دانش) را می‌دهید؛ پنل متن را روی مرز
       <code>&lt;!-- SECTION --&gt;</code>ها یا مرز حدود ۱۰۰۰ واژه تکه می‌کند، هر تکه را با پرامپت آماده
       (همراه نمونه‌سوال‌های واقعی) به مدل زبانی می‌فرستد و سوال‌ها را جمع، یکتاسازی و رندر می‌کند.
+      تب «درخواست‌های دسته‌ای» هم درخواست‌های آزاد شما را دونه‌دونه به مدل می‌فرستد و پاسخ‌ها را بدون تکرار جمع می‌کند.
     </p>
   </div>
   <div class="card">
@@ -228,6 +304,19 @@ th{background:var(--panel2)}
       <li><b>JSON</b> — آرایه‌ی سوال‌ها با <code>question</code>، <code>options</code>، <code>answerIndex</code>، <code>explanation</code> و <code>topic</code>؛ مناسب استفاده‌ی برنامه‌ای.</li>
       <li><b>برگه‌ی آزمون (Markdown)</b> — صورت سوال با گزینه‌های الف تا د + پاسخ‌نامه‌ی جدا در انتهای فایل.</li>
     </ul>
+  </div>
+  <div class="card">
+    <h2>تب «درخواست‌های دسته‌ای»</h2>
+    <p class="hint" style="font-size:13.5px">
+      در این تب هر خط از کادر، یک درخواست کامل برای مدل است؛ مثلاً
+      «۲۰۰ تا اسم دانشمند مشهور ایرانی و جهانی رو برگردون». با زدن «شروع ارسال»،
+      پنل خط‌ها را یکی‌یکی به همان API تب «تولید سوال» می‌فرستد، پاسخ هر درخواست را به‌شکل
+      فهرست تک‌خطی می‌گیرد، موارد را با نرمال‌سازی فارسی (ی/ك، اعراب، نیم‌فاصله و علائم) مقایسه و
+      تکراری‌ها را حذف می‌کند و فهرست یکتا را به‌صورت فایل <b>MD</b> می‌دهد.
+      اگر مدل در هر اجرا تعداد کمی مورد بدهد، «تکرار هر درخواست» را بالا ببرید: هر تکرار با دمای
+      ۰٫۹ دوباره اجرا می‌شود و فقط موارد تازه به فهرست اضافه می‌شوند. نتایج در localStorage می‌مانند
+      و با هر اجرای بعدی ادامه پیدا می‌کنند.
+    </p>
   </div>
   <div class="card">
     <h2>بانک دانش</h2>
@@ -302,7 +391,8 @@ ${JSON.stringify(SAMPLES, null, 1)}
 یادت باشد: خروجی نهایی فقط آرایه‌ی JSON باشد.`;
 
 /* ============================== settings ============================== */
-const LS = { settings:'qa-panel.settings.v1', questions:'qa-panel.questions.v1', input:'qa-panel.input.v1' };
+const LS = { settings:'qa-panel.settings.v1', questions:'qa-panel.questions.v1', input:'qa-panel.input.v1',
+  batchInput:'qa-panel.batch.input.v1', batchItems:'qa-panel.batch.items.v1', batchMeta:'qa-panel.batch.meta.v1' };
 const settings = Object.assign({ base:'', key:'', model:'', perChunk:6, maxWords:1000, prompt:DEFAULT_PROMPT },
   JSON.parse(localStorage.getItem(LS.settings) || '{}'));
 function saveSettings(){ localStorage.setItem(LS.settings, JSON.stringify(settings)); }
@@ -317,6 +407,7 @@ Object.keys(cfgEls).forEach(k=>cfgEls[k].addEventListener('input', ()=>{
   settings.perChunk=Math.max(1,Math.min(20,+EN(cfgEls.perChunk.value)||6));
   settings.maxWords=Math.max(300,Math.min(2000,+EN(cfgEls.maxWords.value)||1000));
   settings.prompt=cfgEls.prompt.value; saveSettings();
+  pushCfgToBatch();
 }));
 $('#btn-prompt-reset').addEventListener('click', ()=>{ settings.prompt=DEFAULT_PROMPT; cfgEls.prompt.value=DEFAULT_PROMPT; saveSettings(); toast('پرامپت پیش‌فرض بازگردانی شد'); });
 
@@ -582,8 +673,219 @@ $('#btn-send-all').addEventListener('click', ()=>{
   openView('gen'); toast('کل بانک به تولید سوال رفت — '+FA(chunks.length||planChunks(bankRaw,settings.maxWords).length)+' تکه');
 });
 
+/* ============================== batch tab ============================== */
+const BATCH_DEFAULT_PROMPT =
+`تو یک «تولیدکننده‌ی فهرست» دقیق هستی. کاربر هر بار یک درخواست می‌دهد و تو فقط و فقط فهرستِ خواسته‌شده را برمی‌گردانی.
+
+قواعد سخت‌گیرانه‌ی خروجی:
+1. هر مورد دقیقاً در یک خط جداگانه؛ بدون شماره‌گذاری، بدون گلوله (• یا -)، بدون قالب‌بندی مارک‌داون، بدون توضیح اضافه.
+2. هیچ مقدمه‌ای در شروع، هیچ سرستونِ گروه‌بندی (مثل «ایرانی:») و هیچ جمع‌بندی در پایان ننویس؛ فقط خودِ موارد، پشت‌سرهم.
+3. اگر تعداد مشخصی در درخواست آمده (مثلاً ۲۰۰ مورد)، همان تعداد را بده؛ اگر دانش واقعی‌ات کمتر اجازه می‌دهد، تا بیشینه‌ی مواردِ واقعی و درست بده و هیچ مورد جعلی یا تکراری‌ای نساز.
+4. موارد باید واقعی و درست باشند و املای درست داشته باشند؛ بین خط‌ها خط خالی نگذار.
+5. خروجی نهایی فقط خط‌های فهرست است؛ حتی یک واژه‌ی اضافه هم ننویس.`;
+
+const BATCH_MAX_ITEMS = 20000;
+let batchItems = JSON.parse(localStorage.getItem(LS.batchItems) || '[]');
+let batchMeta  = JSON.parse(localStorage.getItem(LS.batchMeta)  || '{"dup":0,"err":0}');
+let batchDupTotal = +(batchMeta && batchMeta.dup) || 0;
+let batchErrTotal = +(batchMeta && batchMeta.err) || 0;
+let batchJobs=[], batchRunning=false, batchStop=false;
+const bSeen = new Set(batchItems.map(it=>it.norm));
+const bReqTA = $('#b-reqs');
+bReqTA.value = localStorage.getItem(LS.batchInput) || '';
+bReqTA.addEventListener('input', ()=>localStorage.setItem(LS.batchInput, bReqTA.value));
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+/* --- تنظیمات مشترک با تب تولید سوال --- */
+const bCfg = { base:$('#b-cfg-base'), key:$('#b-cfg-key'), model:$('#b-cfg-model') };
+function updateBatchCfgStatus(){
+  const ok = settings.base && settings.model;
+  $('#b-cfg-status').innerHTML = ok
+    ? `اتصال آماده: <b>${esc(settings.model)}</b>`
+    : `<b class="bad">تنظیمات API کامل نیست</b> — نشانی پایه و نام مدل را وارد کنید`;
+}
+function pushCfgToBatch(){ bCfg.base.value=settings.base; bCfg.key.value=settings.key; bCfg.model.value=settings.model; updateBatchCfgStatus(); }
+function pushCfgToGen(){ cfgEls.base.value=settings.base; cfgEls.key.value=settings.key; cfgEls.model.value=settings.model; }
+Object.keys(bCfg).forEach(k=>bCfg[k].addEventListener('input', ()=>{
+  settings.base=bCfg.base.value.trim(); settings.key=bCfg.key.value.trim(); settings.model=bCfg.model.value.trim();
+  saveSettings(); pushCfgToGen();
+}));
+pushCfgToBatch();
+
+/* --- پرامپت و نمونه --- */
+$('#b-prompt').value = settings.batchPrompt || BATCH_DEFAULT_PROMPT;
+$('#b-prompt').addEventListener('input', ()=>{ settings.batchPrompt=$('#b-prompt').value; saveSettings(); });
+$('#b-prompt-reset').addEventListener('click', ()=>{ settings.batchPrompt=BATCH_DEFAULT_PROMPT; $('#b-prompt').value=BATCH_DEFAULT_PROMPT; saveSettings(); toast('پرامپت پیش‌فرض بازگردانی شد'); });
+$('#b-sample').addEventListener('click', ()=>{
+  bReqTA.value = ['۲۰۰ تا اسم دانشمند مشهور ایرانی و جهانی رو برگردون','۱۵۰ اسم شاعر و نویسنده‌ی مشهور ایرانی و جهانی رو برگردون','۱۰۰ اسم فیلمساز مطرح سینمای جهان رو برگردون'].join('\n');
+  localStorage.setItem(LS.batchInput, bReqTA.value); toast('سه درخواست نمونه درج شد');
+});
+$('#b-clear-reqs').addEventListener('click', ()=>{ bReqTA.value=''; localStorage.removeItem(LS.batchInput); });
+
+/* --- نرمال‌سازی و استخراج موارد از پاسخ مدل --- */
+const normItem = s => String(s)
+  .replace(/[\u200b-\u200f\uFEFF]/g,' ')
+  .replace(/[\u0649\u064A]/g,'ی').replace(/ك/g,'ک').replace(/[ۀة]/g,'ه')
+  .replace(/[\u064B-\u065F\u0670\u0640]/g,'')
+  .replace(/[\(\)\[\]\{\}«»"'`,،;؛:!؟?٪*\.\/\\\-–—]/g,' ')
+  .replace(/\s+/g,' ').trim().toLowerCase();
+
+function extractItems(raw){
+  let lines = String(raw).replace(/```[a-z]*/gi,'').split('\n')
+    .map(l=>l.trim())
+    .filter(Boolean)
+    .map(l=>l
+      .replace(/^[-*•–—·]+\s*/,'')
+      .replace(/^\(\d+\)\s*/,'')
+      .replace(/^\d{1,3}[.)]\s*/,'')
+      .replace(/^[۰-۹]{1,3}[.)،٫]\s*/,'')
+      .replace(/^#+\s*/,'')
+      .replace(/\*\*/g,'')
+      .trim())
+    .filter(Boolean);
+  // خط مقدمه‌ی احتمالی مدل («در ادامه فهرست...») فقط وقتی پاسخ چندخطی است حذف می‌شود
+  if(lines.length>3 && lines[0].length<90 && /^(خب|حتما|بله|سلام|در ادامه|در زیر|اینجا|لیست|فهرست|پاسخ)/.test(lines[0])) lines=lines.slice(1);
+  // سرستون‌های گروه‌بندی مثل «ایرانی:» حذف می‌شوند
+  lines = lines.filter(l=>!/[:：]$/.test(l) || l.length>=40);
+  return lines;
+}
+
+/* --- فراخوانی مدل و ثبت موارد یکتا --- */
+function saveBatch(){
+  localStorage.setItem(LS.batchItems, JSON.stringify(batchItems));
+  localStorage.setItem(LS.batchMeta, JSON.stringify({dup:batchDupTotal, err:batchErrTotal}));
+}
+async function batchCall(job){
+  const base=settings.base.replace(/\/+$/,'');
+  if(!base||!settings.model) throw new Error('نشانی پایه‌ی API یا نام مدل تنظیم نشده است');
+  const res=await fetch(base+'/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+settings.key},
+    body:JSON.stringify({
+      model:settings.model, temperature:0.9,
+      messages:[
+        {role:'system', content:$('#b-prompt').value || BATCH_DEFAULT_PROMPT},
+        {role:'user', content:job.req}
+      ]
+    })
+  });
+  if(!res.ok){ const t=await res.text(); throw new Error('HTTP '+res.status+' — '+t.slice(0,140)); }
+  const data=await res.json();
+  const content=data.choices?.[0]?.message?.content || '';
+  const items=extractItems(content);
+  if(!items.length) throw new Error('فهرستی در پاسخ یافت نشد');
+  let fresh=0, dup=0;
+  for(const it of items){
+    const nm=normItem(it);
+    if(!nm) continue;
+    if(bSeen.has(nm)){ dup++; continue; }
+    if(batchItems.length>=BATCH_MAX_ITEMS){ toast('سقف '+FA(BATCH_MAX_ITEMS)+' مورد یکتا پر شد'); break; }
+    bSeen.add(nm);
+    batchItems.push({text:it, norm:nm, src:job.req});
+    fresh++;
+  }
+  batchDupTotal+=dup;
+  return {got:items.length, fresh, dup};
+}
+
+/* --- اجرای صف درخواست‌ها --- */
+function setBatchStatus(html){ $('#b-status').innerHTML=html; }
+function renderBatchChips(){
+  $('#b-chips').innerHTML = batchJobs.map((j,i)=>
+    `<span class="chip ${j.status||''}" title="${esc(j.req)}">${FA(i+1)}. ${esc(j.req.length>22?j.req.slice(0,22)+'…':j.req)}${j.fresh?` · +${FA(j.fresh)}`:''}${j.dup?` · ${FA(j.dup)}تکراری`:''}${j.err?` · خطا`:''}</span>`
+  ).join('') || '<span class="hint">هنوز اجرایی شروع نشده است.</span>';
+  const done=batchJobs.filter(j=>j.status==='done').length, err=batchJobs.filter(j=>j.status==='err').length;
+  $('#b-bar').style.width = batchJobs.length ? Math.round(100*(done+err)/batchJobs.length)+'%' : '0';
+}
+async function runBatch(){
+  if(batchRunning) return;
+  const reqLines = bReqTA.value.split('\n').map(x=>x.trim()).filter(Boolean);
+  if(!reqLines.length){ toast('اول درخواست‌ها را بنویسید — هر خط یک درخواست'); return; }
+  if(!settings.base||!settings.model){ toast('نشانی پایه‌ی API یا نام مدل تنظیم نشده است'); return; }
+  const reps=Math.max(1,Math.min(10, +EN($('#b-repeat').value)||1));
+  const delay=Math.max(0,Math.min(10000, +EN($('#b-delay').value)||350));
+  batchJobs=[];
+  reqLines.forEach(req=>{ for(let r=1;r<=reps;r++) batchJobs.push({req, status:'', got:0, fresh:0, dup:0, err:''}); });
+  batchRunning=true; batchStop=false;
+  $('#b-run').disabled=true; $('#b-stop').disabled=false;
+  let ok=0, errN=0;
+  for(let i=0;i<batchJobs.length;i++){
+    if(batchStop){ setBatchStatus('<b>متوقف شد</b>'); break; }
+    const j=batchJobs[i];
+    j.status='run'; renderBatchChips();
+    setBatchStatus(`درخواست <b>${FA(i+1)}/${FA(batchJobs.length)}</b>: «${esc(j.req.slice(0,40))}${j.req.length>40?'…':''}»...`);
+    try{
+      const r=await batchCall(j);
+      j.status='done'; j.got=r.got; j.fresh=r.fresh; j.dup=r.dup; ok++;
+      saveBatch(); renderBatchResults();
+    }catch(e){ j.status='err'; j.err=String(e.message||e); errN++; batchErrTotal++; saveBatch(); }
+    renderBatchChips();
+    await sleep(delay);
+  }
+  batchRunning=false; $('#b-run').disabled=false; $('#b-stop').disabled=true;
+  if(!batchStop) setBatchStatus(`<b class="ok">پایان:</b> ${FA(ok)} اجرای موفق، <b class="${errN?'bad':'ok'}">${FA(errN)} خطا</b>`);
+  saveBatch();
+}
+$('#b-run').addEventListener('click', runBatch);
+$('#b-stop').addEventListener('click', ()=>{ batchStop=true; setBatchStatus('<b class="bad">در حال توقف...</b>'); });
+
+/* --- نمایش و خروجی نتایج --- */
+function groupBatchItems(){
+  const groups=[]; const idx={};
+  batchItems.forEach(it=>{
+    if(!(it.src in idx)){ idx[it.src]=groups.length; groups.push({src:it.src, items:[]}); }
+    groups[idx[it.src]].items.push(it);
+  });
+  return groups;
+}
+function renderBatchResults(){
+  $('#b-st-uniq').textContent=FA(batchItems.length);
+  $('#b-st-dups').textContent=FA(batchDupTotal);
+  $('#b-st-errs').textContent=FA(batchErrTotal);
+  $('#b-empty').style.display = batchItems.length?'none':'block';
+  const groups=groupBatchItems();
+  const flat=`<details class="acc"><summary><span>همه‌ی موارد یکتا — فهرست پیوسته</span><span class="w">${FA(batchItems.length)} مورد</span></summary><div class="list">${
+    batchItems.map((it,i)=>`<div class="secrow"><span class="t">${esc(it.text)}</span><span class="w">${FA(i+1)}</span></div>`).join('')
+  }</div></details>`;
+  const byReq = groups.map((g,gi)=>`<details class="acc"><summary><span>${FA(gi+1)}. ${esc(g.src.length>70?g.src.slice(0,70)+'…':g.src)}</span><span class="w">${FA(g.items.length)} مورد</span></summary><div class="list">${
+    g.items.map((it,ii)=>`<div class="secrow"><span class="t">${esc(it.text)}</span><span class="w">${FA(ii+1)}</span></div>`).join('')
+  }</div></details>`).join('');
+  $('#b-results').innerHTML = flat + byReq;
+}
+$('#b-copy').addEventListener('click', async ()=>{
+  if(!batchItems.length) return toast('چیزی برای کپی نیست');
+  try{ await navigator.clipboard.writeText(batchItems.map(it=>it.text).join('\n')); toast(FA(batchItems.length)+' مورد کپی شد'); }
+  catch(e){ toast('کپی ناموفق بود — از خروجی MD استفاده کنید'); }
+});
+$('#b-exp-md').addEventListener('click', ()=>{
+  if(!batchItems.length) return toast('چیزی برای خروجی نیست');
+  const groups=groupBatchItems();
+  const L=[`# خروجی درخواست‌های دسته‌ای`,''];
+  L.push(`- تاریخ: ${new Date().toLocaleDateString('fa-IR')}`);
+  L.push(`- مدل: ${settings.model||'—'}`);
+  L.push(`- موارد یکتا: ${FA(batchItems.length)}`);
+  L.push(`- موارد تکراری حذف‌شده: ${FA(batchDupTotal)}`);
+  L.push(`- خطاها: ${FA(batchErrTotal)}`,'');
+  L.push(`## فهرست کامل موارد یکتا`,'');
+  batchItems.forEach((it,i)=>L.push(`${FA(i+1)}. ${it.text}`));
+  L.push('',`## تفکیک بر پایه‌ی درخواست`,'');
+  groups.forEach((g,gi)=>{
+    L.push(`### درخواست ${FA(gi+1)}`, '', `«${g.src}»`, '');
+    g.items.forEach((it,ii)=>L.push(`${FA(ii+1)}. ${it.text}`));
+    L.push('');
+  });
+  download('qa-panel-batch.md', L.join('\n'));
+});
+$('#b-wipe').addEventListener('click', ()=>{
+  if(confirm('همه‌ی نتایج تب دسته‌ای پاک شوند؟ (تنظیمات و متن درخواست‌ها باقی می‌ماند)')){
+    batchItems=[]; bSeen.clear(); batchDupTotal=0; batchErrTotal=0; batchJobs=[];
+    saveBatch(); renderBatchResults(); renderBatchChips(); $('#b-bar').style.width='0'; setBatchStatus('آماده');
+  }
+});
+
 /* ============================== init ============================== */
 renderQuestions(); renderChunks();
+renderBatchResults(); renderBatchChips();
 </script>
 </body>
 </html>
